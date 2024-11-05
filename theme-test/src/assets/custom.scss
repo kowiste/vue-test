@@ -1,0 +1,65 @@
+// src/assets/custom.scss
+
+@import '../../node_modules/bootstrap/scss/functions';
+@import '../../node_modules/bootstrap/scss/variables';
+@import '../../node_modules/bootstrap/scss/variables-dark';
+
+
+//Define custom colors
+$custom-navy: #0A192F;
+$custom-coral: #FF6B6B;
+$custom-mint: #4ECCA3;
+$custom-lavender: #9B89B3;
+
+//theme colors
+$theme-colors: (
+    "primary": #2563eb,
+    "secondary": #64748b,
+    "success": #059669,
+    "danger": #dc2626,
+    "warning": #d97706,
+    "info": #0891b2,
+    "light": #f8fafc,
+    "dark": $custom-navy,
+    "coral": $custom-coral,
+    "mint": $custom-mint,
+    "lavender": $custom-lavender
+);
+
+//Update theme-colors-rgb map
+$theme-colors-rgb: map-loop($theme-colors, to-rgb, "$value");
+
+@import '../../node_modules/bootstrap/scss/bootstrap';
+
+
+// Dark mode overrides
+[data-bs-theme="dark"] {
+    --bs-body-bg: #{$custom-navy};
+    --bs-body-color: #e2e8f0;
+
+    // Dark mode color variants
+    --bs-primary-rgb: #{to-rgb(#3b82f6)};
+    --bs-secondary-rgb: #{to-rgb(#94a3b8)};
+    --bs-success-rgb: #{to-rgb(#10b981)};
+    --bs-danger-rgb: #{to-rgb(#ef4444)};
+    --bs-warning-rgb: #{to-rgb(#f59e0b)};
+    --bs-info-rgb: #{to-rgb(#06b6d4)};
+    --bs-light-rgb: #{to-rgb(#1e293b)};
+    --bs-dark-rgb: #{to-rgb(#0f172a)};
+    --bs-coral-rgb: #{to-rgb(#ff8585)};
+    --bs-mint-rgb: #{to-rgb(#6ee7c0)};
+    --bs-lavender-rgb: #{to-rgb(#b4a4c9)};
+
+    // Set dark mode colors
+    --bs-primary: #3b82f6;
+    --bs-secondary: #94a3b8;
+    --bs-success: #10b981;
+    --bs-danger: #ef4444;
+    --bs-warning: #f59e0b;
+    --bs-info: #06b6d4;
+    --bs-light: #1e293b;
+    --bs-dark: #0f172a;
+    --bs-coral: #ff8585;
+    --bs-mint: #6ee7c0;
+    --bs-lavender: #b4a4c9;
+}
