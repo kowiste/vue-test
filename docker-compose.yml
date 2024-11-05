@@ -10,6 +10,7 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U keycloak"]
       interval: 10s
@@ -40,6 +41,7 @@ services:
       - --spi-cookie-same-site-cookie-same-site-mode=None
     ports:
       - "7080:8080"
+    restart: unless-stopped
     depends_on:
       postgres:
         condition: service_healthy
