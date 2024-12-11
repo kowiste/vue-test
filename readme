@@ -1,0 +1,205 @@
+# Keycloak Resource-Based Authorization Setup Guide
+
+## 1. Enable Authorization Services
+
+1. Go to your Keycloak Admin Console
+2. Select your realm
+3. Go to Clients
+4. Select your client (the one used in your Vue application)
+5. Go to the "Settings" tab
+6. Enable "Authorization"
+7. Click "Save"
+
+## 2. Create Resources
+
+1. Go to your client's "Authorization" tab
+2. Click on "Resources" in the submenu
+3. Click "Create" to add each resource:
+
+### Admin Dashboard Resource
+```
+Name: admin-dashboard
+Type: urn:your-app:resources:admin-dashboard
+URI: /admin
+Display name: Admin Dashboard
+Scopes: view
+```
+
+### Supervisor Dashboard Resource
+```
+Name: supervisor-dashboard
+Type: urn:your-app:resources:supervisor-dashboard
+URI: /supervisor
+Display name: Supervisor Dashboard
+Scopes: view
+```
+
+### Agent Dashboard Resource
+```
+Name: agent-dashboard
+Type: urn:your-app:resources:agent-dashboard
+URI: /agent
+Display name: Agent Dashboard
+Scopes: view
+```
+
+## 3. Create Authorization Scopes
+
+1. Go to the "Authorization Scopes" section
+2. Click "Create" and add:
+```
+Name: view
+Display name: View
+```
+
+## 4. Create Policies
+
+Policies define who can access resources. Create role-based policies:
+
+1. Go to the "Policies" tab
+2. Click "Create" and select "Role"
+
+### Admin Policy
+```
+Name: admin-policy
+Description: Grants access to administrators
+Roles: realm:admin
+```
+
+### Supervisor Policy
+```
+Name: supervisor-policy
+Description: Grants access to supervisors
+Roles: realm:supervisor
+```
+
+### Agent Policy
+```
+Name: agent-policy
+Description: Grants access to agents
+Roles: realm:agent
+```
+
+## 5. Create Permission Assignments
+
+Permissions link resources with policies:
+
+1. Go to the "Permissions" tab
+2. Click "Create" and select "Resource-Based"
+
+### Admin Dashboard Permission
+```
+Name: admin-dashboard-permission
+Resources: admin-dashboard
+Apply Policy: admin-policy
+Scopes: view
+```
+
+### Supervisor Dashboard Permission
+```
+Name: supervisor-dashboard-permission
+Resources: supervisor-dashboard
+Apply Policy: admin-policy, supervisor-policy
+Scopes: view
+```
+
+### Agent Dashboard Permission
+```
+Name: agent-dashboard-permission
+Resources: agent-dashboard
+Apply Policy: admin-policy, supervisor-policy, agent-policy
+Scopes: view
+```
+
+## 6. Configure Token Claims
+
+1. Go to your client's "Client Scopes" tab
+2. Select the dedicated scope for your client
+3. Go to "Mappers" tab
+4. Create a new mapper:
+```
+Name: resource_access
+Mapper Type: User Client Role
+Token Claim Name: resource_access
+Claim JSON Type: String
+Add to ID token: ON
+Add to access token: ON
+Add to userinfo: ON
+```
+
+## 7. Test the Configuration
+
+1. Create test users with different roles
+2. Assign roles to the users
+3. Try logging in with different users
+4. Check the token content (from your Vue app console):
+```javascript
+console.log(authStore.keycloak.tokenParsed.resource_access)
+```
+
+You should see something like:
+```json
+{
+  "admin-dashboard": {
+    "roles": ["view"]
+  },
+  "supervisor-dashboard": {
+    "roles": ["view"]
+  },
+  "agent-dashboard": {
+    "roles": ["view"]
+  }
+}
+```
+
+## Common Issues and Solutions
+
+1. **Missing Permissions**: If permissions aren't showing up in the token:
+   - Check that the roles are properly assigned to the user
+   - Verify the policy configurations
+   - Ensure the resource scopes are correctly set
+
+2. **Token Size**: If you have many resources and permissions:
+   - Consider using groups instead of individual roles
+   - Only include necessary scopes
+   - Use protocol mappers to filter claims
+
+3. **Authorization not Working**: 
+   - Verify the client has authorization enabled
+   - Check that all resources have proper URIs
+   - Ensure policies are correctly linked to permissions
+
+## Additional Security Considerations
+
+1. **Fine-Grained Permissions**: You can add more scopes like:
+   - create
+   - edit
+   - delete
+
+2. **Group-Based Policies**: Instead of role-based policies, consider using groups for better scalability:
+```
+Name: support-team-policy
+Type: Group
+Groups: /support-team
+```
+
+3. **Time-Based Restrictions**: Add time-based policies for temporary access:
+```
+Name: business-hours-policy
+Type: Time
+Start Time: 09:00
+End Time: 17:00
+Days: Monday through Friday
+```
+
+## Monitoring and Maintenance
+
+1. **Audit Events**: Enable audit logging:
+   - Go to Realm Settings > Events
+   - Enable "Save Events"
+   - Select relevant events to track
+
+2. **Token Review**: Regularly review token contents:
+   - Check for unnecessary claims
+   - Verify permission assignments
+   - Monitor token size

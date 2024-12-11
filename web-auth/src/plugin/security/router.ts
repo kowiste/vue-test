@@ -1,10 +1,9 @@
 import type { NavigationGuardNext, RouteLocationNormalized } from 'vue-router'
 import { useAuthStore } from './store'
-import type { ResourcePermission, Role } from './types'
+import type { ResourcePermission } from './types'
 
 export interface AuthMeta {
   requiresAuth?: boolean
-  roles?: Role[]
   resource?: string
   permissions?: ResourcePermission[]
 }
@@ -24,11 +23,6 @@ export async function authGuard(
   if (!authStore.isAuthenticated) {
     await authStore.login(to.fullPath)
     return
-  }
-
-  // Check roles if specified
-  if (meta.roles && !authStore.hasAnyRole(meta.roles)) {
-    return next({ name: 'unauthorized' })
   }
 
   // Check resource permissions if specified

@@ -15,7 +15,8 @@ const router = createRouter({
       component: () => import('@/views/AdminView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['admin'],
+        resource: 'admin-dashboard',
+        permissions: ['view'],
       },
     },
     {
@@ -24,7 +25,8 @@ const router = createRouter({
       component: () => import('@/views/SupervisorView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['supervisor', 'admin'],
+        resource: 'supervisor-dashboard',
+        permissions: ['view'],
       },
     },
     {
@@ -33,7 +35,8 @@ const router = createRouter({
       component: () => import('@/views/AgentView.vue'),
       meta: {
         requiresAuth: true,
-        roles: ['agent', 'supervisor', 'admin'],
+        resource: 'agent-dashboard',
+        permissions: ['view'],
       },
     },
     {
@@ -45,5 +48,4 @@ const router = createRouter({
 })
 
 router.beforeEach(authGuard)
-
 export default router

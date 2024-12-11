@@ -1,11 +1,10 @@
 import { defineStore } from 'pinia'
 import Keycloak from 'keycloak-js'
-import type { Role, ResourcePermission } from './types'
+import type { ResourcePermission } from './types'
 
 interface AuthState {
   keycloak?: Keycloak
   isInitialized: boolean
-  roles: Set<Role>
   resourcePermissions: Map<string, Set<ResourcePermission>>
 }
 
@@ -13,7 +12,6 @@ export const useAuthStore = defineStore('auth', {
   state: (): AuthState => ({
     keycloak: undefined,
     isInitialized: false,
-    roles: new Set(),
     resourcePermissions: new Map(),
   }),
 
@@ -24,18 +22,6 @@ export const useAuthStore = defineStore('auth', {
 
     token(): string | undefined {
       return this.keycloak?.token
-    },
-
-    hasRole(): (role: Role) => boolean {
-      return (role: Role) => this.roles.has(role)
-    },
-
-    hasAnyRole(): (roles: Role[]) => boolean {
-      return (roles: Role[]) => roles.some((role) => this.roles.has(role))
-    },
-
-    hasAllRoles(): (roles: Role[]) => boolean {
-      return (roles: Role[]) => roles.every((role) => this.roles.has(role))
     },
 
     hasResourcePermission(): (
@@ -53,33 +39,13 @@ export const useAuthStore = defineStore('auth', {
     setKeycloak(keycloak: Keycloak) {
       this.keycloak = keycloak
       this.isInitialized = true
-      this.updateRoles()
       this.updateResourcePermissions()
-    },
-
-    updateRoles() {
-      if (!this.keycloak) return
-
-      const realmRoles = this.keycloak.realmAccess?.roles ?? []
-      const clientRoles = Object.values(
-        this.keycloak.resourceAccess ?? {}
-      ).flatMap((access) => access.roles)
-
-      const allRoles = [...realmRoles, ...clientRoles]
-
-      this.roles = new Set(
-        allRoles.filter((role): role is Role =>
-          ['admin', 'supervisor', 'agent'].includes(role)
-        )
-      )
     },
 
     updateResourcePermissions() {
       if (!this.keycloak) return
 
-      // Example of parsing resource_access from token
       const resourceAccess = this.keycloak.tokenParsed?.resource_access ?? {}
-
       this.resourcePermissions.clear()
 
       Object.entries(resourceAccess).forEach(
